@@ -35,6 +35,10 @@
   text-align: left;
   overflow: hidden;
 }
+.their-chats .filter .toogle {
+  cursor: pointer;
+  color: rgb(13, 153, 235);
+}
 .their-chats .filter .replied-link {
   color: inherit;
 }

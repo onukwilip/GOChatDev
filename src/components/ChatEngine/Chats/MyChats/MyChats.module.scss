@@ -32,6 +32,10 @@
     max-width: 100%;
     text-align: left;
     overflow: hidden;
+    .toogle {
+      cursor: pointer;
+      color: rgba(blue, 0.7);
+    }
     .replied-link {
       color: inherit;
     }

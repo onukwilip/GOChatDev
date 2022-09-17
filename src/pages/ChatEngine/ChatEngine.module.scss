@@ -10,7 +10,7 @@
   @include flex(stretch, flex-start, 0);
   flex-direction: row;
   height: 100vh;
-  min-height: 100vh;
+  // min-height: 100vh;
   overflow-y: auto;
 
   background-color: beige;
@@ -88,5 +88,7 @@
 @media (max-width: 550px) {
   .chat-engine {
     flex-direction: column-reverse;
+    //min-height: 50vh;
+    height: 100vh;
   }
 }

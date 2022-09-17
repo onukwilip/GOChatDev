@@ -148,11 +148,12 @@
   .chat {
     height: 100%;
     .bg {
-      height: 100%;
     }
     .body {
+      height: 100%;
+      overflow-y: auto;
       .platform {
-        height: 460px;
+        height: 73.5%;
         padding: 10px;
       }
       .form {
@@ -180,17 +181,41 @@
   }
 }
 
-@media (max-width: 360px) {
+@media (max-width: 420px) {
   .chat {
     .body {
       .platform {
-        // height: 80%;
-        max-height: 440px;
+        height: 80.8%;
+      }
+    }
+  }
+}
+
+@media (max-width: 360px) {
+  .chat {
+    .bg {
+    }
+    .body {
+      height: 100%;
+      overflow-y: auto;
+      .platform {
+        height: 76%;
+        //max-height: 440px;
         overflow: auto;
         padding: 10px;
       }
       .form {
-        max-height: 20%;
+        // height: 10%;
+      }
+    }
+  }
+}
+
+@media (max-width: 340px) {
+  .chat {
+    .body {
+      .platform {
+        height: 73.3%;
       }
     }
   }
