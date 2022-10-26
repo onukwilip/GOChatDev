@@ -8,8 +8,8 @@ export const Form = (props) => {
   };
 
   return (
-    <div className={css["form-container"]}>
-      <form className={css.form} onSubmit={onSubmit}>
+    <div className={`${css["form-container"]} ${props.className}`}>
+      <form className={`${css.form}`} onSubmit={onSubmit}>
         {props.children}
       </form>
     </div>
@@ -17,8 +17,23 @@ export const Form = (props) => {
 };
 
 export const FormGroup = (props) => {
+  if (props.type === "textarea") {
+    return (
+      <div className={css.textarea}>
+        <textarea
+          placeholder={props.placeholder}
+          onChange={props.onChange}
+          required={props.required}
+          disabled={props.disabled}
+        >
+          {props.children}
+        </textarea>
+      </div>
+    );
+  }
+
   return (
-    <label className={css["form-group"]}>
+    <label className={`${css["form-group"]} ${props.className}`}>
       <div className={css["form-icon"]}>
         <i
           className={props.icon}
@@ -34,10 +49,9 @@ export const FormGroup = (props) => {
           name={props.name}
           placeholder={props.placeholder}
           value={props.value}
-          onChange={(e) => {
-            props.onChange(e.target.value);
-          }}
+          onChange={props.onChange}
           required={props.required}
+          disabled={props.disabled}
         />
       </div>
     </label>

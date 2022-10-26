@@ -1,5 +1,5 @@
 import "./App.css";
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, Route, Routes } from "react-router-dom";
 import { General } from "./context/GeneralContext";
@@ -7,9 +7,12 @@ import Login from "./pages/Login/Login";
 import ChatEngine from "./pages/ChatEngine/ChatEngine";
 import Register from "./pages/Register/Register";
 import ConfirmOTP from "./pages/ConfirmOTP/ConfirmOTP";
+import Modal from "./components/Modal/Modal";
+import Loader from "./components/Loader/Loader";
 
 function App() {
-  const userId = localStorage.getItem("GO_Media_UserId");
+  const [userId, setUserId] = useState(localStorage.getItem("UserId"));
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const general = useContext(General);
   const apiPrefix = general.domain;
@@ -65,27 +68,41 @@ function App() {
   };
 
   //VERIFY IF USER IS LOGGED IN
-  const verifyUser = () => {
+  const verifyUser = async () => {
+    setLoading(true);
+
+    const ipUrl = "https://geolocation-db.com/json/";
+
+    const ip = await axios.get(ipUrl).catch((e) => {});
+    const ipAddress = ip?.data?.IPv4;
+    general.setIpAddress(ip?.data?.IPv4);
+
     //IF LOCALSTORAGE.USERID IS EMPTY
     if (userId !== null && userId !== "") {
       //CALL API
       axios
-        .get(url, config)
+        .get(`${url}/${general.toBase64(ipAddress)}`, general.config)
         .then((res) => {
+          setLoading(false);
+         
           const user = res.data;
           //IF USER DOESN'T EXIST
           if (
             user.Response.UserExists === false ||
             user.Response.IsAuthenticated === false
           ) {
+            setLoading(false);
+
             //NAVIGATE TO LOGIN
             console.log("User", user);
             navigate("/login", { replace: true });
           }
           //ELSE
           else {
-            localStorage.setItem("GO_Media_UserId", user.UserID);
-            localStorage.setItem("GO_Media_UserName", user.UserName);
+            setLoading(false);
+
+            localStorage.setItem("UserId", user.UserID);
+            console.log(user);
             //NAVIGATE TO CHAT ENGINE
             navigate("/chat", { replace: true });
             //CALL THE isOnline FUNCTION
@@ -94,20 +111,25 @@ function App() {
         })
         //IF ERROR NAVIGATE TO LOGIN
         .catch((e) => {
+          setLoading(false);
+
           console.log("error", e);
           navigate("/login", { replace: true });
         });
     }
     //IF LOCALSTORAGE.USERID IS EMPTY
     else {
+      setLoading(false);
+
       //NAVIGATE TO LOGIN
       navigate("/login", { replace: true });
     }
   };
 
   useEffect(() => {
-    // verifyUser();
+    verifyUser();
     isOnline();
+    setUserId(localStorage.getItem("UserId"));
     return () => {
       isOffline();
       lastSeen();
@@ -115,15 +137,26 @@ function App() {
   }, []);
 
   return (
-    <div>
-      <Routes>
-        <Route path="/" element={<Login />}></Route>
-        <Route path="/login" element={<Login />}></Route>
-        <Route path="/chat/*" element={<ChatEngine />}></Route>
-        <Route path="/register" element={<Register />}></Route>
-        <Route path="/confirm" element={<ConfirmOTP />}></Route>
-      </Routes>
-    </div>
+    <>
+      {loading ? (
+        <div className="loader-container">
+          <Loader />
+        </div>
+      ) : (
+        <>
+          <div>
+            <Routes>
+              <Route path="/" element={<Login />}></Route>
+              <Route path="/login" element={<Login />}></Route>
+              <Route path="/chat/*" element={<ChatEngine />}></Route>
+              <Route path="/register" element={<Register />}></Route>
+              <Route path="/confirm" element={<ConfirmOTP />}></Route>
+            </Routes>
+          </div>
+          {general.modalState === "true" && <Modal />}
+        </>
+      )}
+    </>
   );
 }
 

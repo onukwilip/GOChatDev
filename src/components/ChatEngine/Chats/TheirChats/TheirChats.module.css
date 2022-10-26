@@ -9,15 +9,20 @@
   display: flex;
   justify-content: left;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
   flex-direction: row;
 }
+.their-chats .img-container {
+  cursor: pointer;
+}
 .their-chats .img-container img {
-  width: 55px;
+  width: 30px;
   border-radius: 50%;
   border: 2px solid beige;
   box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.4);
-  height: 55px;
+  height: 30px;
+  -o-object-position: top;
+     object-position: top;
   -o-object-fit: cover;
      object-fit: cover;
 }
@@ -25,12 +30,38 @@
   display: flex;
   justify-content: left;
   align-items: flex-start;
-  gap: 0.2rem;
+  gap: 0;
   flex-direction: column;
+}
+.their-chats .filter-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.3rem;
+  width: 100%;
+  position: relative;
+}
+.their-chats .filter-container .actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0rem;
+  flex-direction: column;
+  position: absolute;
+  right: -2.2rem;
+}
+.their-chats .filter-container .actions > div {
+  transform: scale(0.8);
+}
+.their-chats .filter-container .actions .edit {
+  color: green;
+}
+.their-chats .filter-container .actions .delete {
+  color: orangered;
 }
 .their-chats .filter {
   background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 5px;
+  border-radius: 30px 30px 30px 0;
   width: 100%;
   text-align: left;
   overflow: hidden;
@@ -44,7 +75,7 @@
 }
 .their-chats .filter .replied-message {
   padding: 10px;
-  border-radius: 5px;
+  border-radius: 30px 30px 30px 5px;
   border-left: 5px solid black;
   background-color: rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -65,11 +96,43 @@
 }
 .their-chats .message {
   color: rgba(0, 0, 0, 0.8);
+  word-wrap: break-word;
 }
 .their-chats .time {
   font-size: 14px;
   padding: 5px;
   text-align: left;
+}
+.their-chats .reaction-container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0;
+  padding: 0;
+}
+.their-chats .reaction-container .picker-container {
+  position: relative;
+}
+.their-chats .reaction-container .picker {
+  transform: scale(0.7);
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  z-index: 10;
+}
+.their-chats .reactions {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0;
+  flex-wrap: wrap;
+  position: relative;
+  max-width: 200px;
+}
+.their-chats .reactions div {
+  transform: scale(0.6);
+  margin: 0;
+  box-sizing: border-box;
 }
 .their-chats .file-container {
   display: flex;
@@ -84,7 +147,7 @@
   width: 300px;
   overflow: hidden;
   background-color: rgba(245, 245, 220, 0.3);
-  border-radius: 5px;
+  border-radius: 30px;
   text-align: left;
   display: flex;
   justify-content: flex-start;
@@ -98,13 +161,13 @@
   cursor: pointer;
 }
 .their-chats .file-icon-container {
-  padding: 20px;
+  padding: 10px;
   background-color: #0d99eb;
   border-radius: 50%;
   box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.4);
 }
 .their-chats .file-icon-container i {
-  scale: 1.5;
+  scale: 0.8;
   color: white;
 }
 .their-chats .file-details {
@@ -126,9 +189,25 @@
   font-size: 15px;
 }
 
+.reaction {
+  display: block;
+  position: relative;
+  padding: 0;
+  margin: 0;
+  transition: 0.1s;
+  cursor: pointer;
+}
+.reaction sub {
+  font-size: 12px;
+}
+.reaction:hover {
+  transform: scale(1.2);
+  padding: 3px;
+}
+
 @media (max-width: 550px) {
   .their-chats {
-    padding: 0;
+    padding: 10px 0;
   }
   .their-chats .img-container {
     display: none;

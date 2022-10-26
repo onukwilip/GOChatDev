@@ -14,8 +14,9 @@
   width: 100%;
 }
 .messages .users {
+  margin-top: 2.5rem;
   overflow-y: auto;
-  height: 69.5vh;
+  height: 90vh;
   width: 100%;
 }
 

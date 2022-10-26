@@ -22,6 +22,11 @@
   .body {
     z-index: 10;
     position: relative;
+    //New
+    @include flex(center, space-between, 0);
+    flex-direction: column;
+    height: 100%;
+
     .header {
       width: 100%;
       position: relative;
@@ -70,16 +75,20 @@
         color: rgba(0, 0, 0, 0.5);
       }
     }
+
     .platform {
-      height: 500px;
+      height: 70%;
+      width: 100%;
       overflow-y: auto;
-      padding: $padding + 20px;
+      padding: $padding;
       color: rgba(0, 0, 0, 0.8);
     }
     .form {
       overflow-y: auto;
       padding: $padding + 10px;
       background-color: white;
+      width: 100%;
+
       .form-parent {
         @include flex(center, center, 1rem);
         flex-direction: row;
@@ -142,6 +151,42 @@
       text-align: center;
     }
   }
+  .files-container {
+    @include flex(center, flex-start, 1rem);
+    padding: 0 $padding;
+    & > div {
+      padding: $padding - 5px;
+      background-color: rgba(0, 0, 0, 0.2);
+      line-height: 2rem;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  }
+  .parent-chat {
+    width: 100%;
+    .replied-message {
+      padding: $padding;
+      border-radius: 5px;
+      border-left: 5px solid rgba(gray, 1);
+      background-color: rgba(lightgray, 1);
+      @include flex(center, space-between, 0);
+      & > div {
+        word-wrap: break-word;
+      }
+      em {
+        display: block;
+        font-style: normal;
+      }
+    }
+    .parent-author {
+      font-weight: bold;
+    }
+    .remove-parent {
+      cursor: pointer;
+      padding: 0 10px;
+    }
+  }
 }
 
 @media (max-width: 550px) {
@@ -153,8 +198,8 @@
       height: 100%;
       overflow-y: auto;
       .platform {
-        height: 73.5%;
-        padding: 10px;
+        height: 80%;
+        // padding: 10px;
       }
       .form {
         padding: $padding;
@@ -185,7 +230,7 @@
   .chat {
     .body {
       .platform {
-        height: 80.8%;
+        // height: 80.8%;
       }
     }
   }
@@ -199,10 +244,10 @@
       height: 100%;
       overflow-y: auto;
       .platform {
-        height: 76%;
-        //max-height: 440px;
-        overflow: auto;
-        padding: 10px;
+        // height: 76%;
+        // //max-height: 440px;
+        // overflow: auto;
+        // padding: 10px;
       }
       .form {
         // height: 10%;
@@ -215,7 +260,7 @@
   .chat {
     .body {
       .platform {
-        height: 73.3%;
+        // height: 73.3%;
       }
     }
   }

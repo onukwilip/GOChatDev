@@ -44,7 +44,7 @@ const Register = () => {
     axios
       .put(url, body, config)
       .then((res) => {
-        console.log("Is Online", res.data);
+        // console.log("Is Online", res.data);
       })
       .catch((e) => {
         console.log("Error", e);
@@ -57,15 +57,16 @@ const Register = () => {
         .post(url, body, config)
         .then((res) => {
           const user = res.data;
-          if (user) {
-            console.log("User added successfully", res.data);
-            localStorage.setItem("emailToSendOTP", JSON.stringify(email));
-            localStorage.setItem(
-              "OTPConfirmType",
-              JSON.stringify("Registeration")
-            );
-            //general.setEmailToSendOTP(email);
-            //general.setOTPConfirmType("Registeration");
+          if (user?.Response?.UserExists === true) {
+            //IF USER IS ADDED SUCCESSFULLY NAVIGATE TO CONFIRM OTP
+            // console.log("User added successfully", res.data);
+            const OTP = {
+              type: "login",
+              password: general.toBase64(user?.Password),
+              userid: user?.UserID,
+              email: email,
+            };
+            sessionStorage.setItem("OTP", JSON.stringify(OTP));
             setError("");
             setErrorMessage(false);
             setEmail("");
@@ -80,7 +81,7 @@ const Register = () => {
           }
         })
         .catch((e) => {
-          console.log(e);
+          // console.log(e);
           setErrorMessage(true);
           setError("Error connecting to the server please try again...");
         });
@@ -115,7 +116,9 @@ const Register = () => {
                   value={username}
                   type="text"
                   required={true}
-                  onChange={setUsername}
+                  onChange={(e) => {
+                    setUsername(e.target.value);
+                  }}
                   placeholder="Username"
                 />
               </div>
@@ -125,7 +128,9 @@ const Register = () => {
                   value={email}
                   type="email"
                   required={true}
-                  onChange={setEmail}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                  }}
                   placeholder="Email address"
                 />
               </div>
@@ -136,7 +141,9 @@ const Register = () => {
               required={true}
               value={password}
               type="password"
-              onChange={setPassword}
+              onChange={(e) => {
+                setPassword(e.target.value);
+              }}
             />
             <FormGroup
               icon="fa fa-lock"
@@ -144,7 +151,9 @@ const Register = () => {
               required={true}
               value={confirm}
               type="password"
-              onChange={setConfirm}
+              onChange={(e) => {
+                setConfirm(e.target.value);
+              }}
             />
             <FormGroup
               icon="fa fa-phone"
@@ -152,7 +161,9 @@ const Register = () => {
               required={true}
               value={phone}
               type="tel"
-              onChange={setPhone}
+              onChange={(e) => {
+                setPhone(e.target.value);
+              }}
             />
             <Button>Sign up</Button>
             {errorMessage && <p className="error">{error}</p>}

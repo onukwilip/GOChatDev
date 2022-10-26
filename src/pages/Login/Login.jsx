@@ -21,7 +21,7 @@ const Login = () => {
   const apiPrefix = general.domain;
   const config = {
     headers: {
-      ...general.config.headers,
+      "Access-control-allow-origin": "*",
       Accept: "application/json",
       "Content-Type": "application/json; charset=UTF-8",
     },
@@ -54,33 +54,41 @@ const Login = () => {
       .then((res) => {
         const user = res.data;
         if (!user.Response.UserExists) {
+          //IF USER DOESN'T EXIST SET INVLID TO TRUE
           setErrorMessage({
             state: true,
             message: "Invalid username or password...",
           });
         } else if (!user.Response.IsAuthenticated) {
           //SEND OTP IF !USER IS AUTHENTICATED
-          localStorage.setItem("emailToSendOTP", JSON.stringify(email));
-          localStorage.setItem(
-            "OTPConfirmType",
-            JSON.stringify("Registeration")
-          );
           navigate("/confirm", { replace: true });
-          console.log(res.data);
+          const OTP = {
+            type: "login",
+            password: general.toBase64(user?.Password),
+            userid: user?.UserID,
+            email: email,
+          };
+          sessionStorage.setItem("OTP", JSON.stringify(OTP));
         } else {
           setErrorMessage({
             state: false,
             message: "",
           });
           isOnline(user.UserID);
-          localStorage.setItem("GO_Media_UserId", user.UserID);
-          localStorage.setItem("GO_Media_UserName", user.UserName);
-          navigate("/chat", { replace: true });
+          // IF USER EXISTS NAVIGATE TO CONFIRM OTP...
+          navigate("/confirm", { replace: true });
+          const OTP = {
+            type: "login",
+            password: general.toBase64(user?.Password),
+            userid: user?.UserID,
+            email: email,
+          };
+          sessionStorage.setItem("OTP", JSON.stringify(OTP));
         }
-        console.log(res.data);
+        // console.log(res.data);
       })
       .catch((e) => {
-        console.log(e);
+        // console.log(e);
         setErrorMessage({
           state: true,
           message: "Error connecting to the server, please try again...",
@@ -108,7 +116,9 @@ const Login = () => {
                 value={email}
                 type="email"
                 required={true}
-                onChange={setEmail}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                }}
                 placeholder="Email address"
               />
               <FormGroup
@@ -117,7 +127,9 @@ const Login = () => {
                 required={true}
                 value={password}
                 type="password"
-                onChange={setPassword}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                }}
               />
               <Button>Sign in</Button>
               {errorMessage.state && (
