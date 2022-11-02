@@ -16,8 +16,9 @@ import { useRef } from "react";
 import ScrollToBottom from "react-scroll-to-bottom";
 import { sendDiscussion } from "../Messages/Messages";
 import { getOne } from "../../ExternalFunctions";
+import { socketDomain } from "../../ExternalFunctions";
 
-const socket = io.connect("http://localhost:3002/chatroom");
+const socket = io.connect(`${socketDomain}/chatroom`);
 
 export const emitMessage = (chat) => {
   socket.emit("chat", { ...chat });

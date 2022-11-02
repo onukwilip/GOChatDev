@@ -15,6 +15,7 @@ const Register = () => {
   const [username, setUsername] = useState("");
   const [confirm, setConfirm] = useState("");
   const [phone, setPhone] = useState("");
+  const [disabled, setDisabled] = useState(false);
   const [errorMessage, setErrorMessage] = useState(false);
   const [error, setError] = useState("");
   const general = useContext(General);
@@ -53,13 +54,16 @@ const Register = () => {
 
   const onSubmit = (e) => {
     if (username && email && password.length >= 6 && confirm === password) {
+      setDisabled(true);
       axios
         .post(url, body, config)
         .then((res) => {
           const user = res.data;
           if (user?.Response?.UserExists === true) {
             //IF USER IS ADDED SUCCESSFULLY NAVIGATE TO CONFIRM OTP
-            // console.log("User added successfully", res.data);
+            console.log("User added successfully", res.data);
+            setDisabled(false);
+
             const OTP = {
               type: "login",
               password: general.toBase64(user?.Password),
@@ -76,11 +80,16 @@ const Register = () => {
             setPhone("");
             navigate("/confirm", { replace: true });
           } else {
+            setDisabled(false);
+            console.log("There was an error", res.data);
+
             setError(`User with email ${email} already exists...`);
             setErrorMessage(true);
           }
         })
         .catch((e) => {
+          setDisabled(false);
+
           // console.log(e);
           setErrorMessage(true);
           setError("Error connecting to the server please try again...");
@@ -165,7 +174,9 @@ const Register = () => {
                 setPhone(e.target.value);
               }}
             />
-            <Button>Sign up</Button>
+            <Button disabled={disabled}>
+              {disabled ? "Loading..." : "Sign up"}
+            </Button>
             {errorMessage && <p className="error">{error}</p>}
             <p className={css.signUp}>
               Already have an account? <Link to="/login">Login...</Link>

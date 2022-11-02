@@ -24,14 +24,10 @@ const Requests = () => {
   const getAllRequests = async () => {
     setLoading(true);
     setError(false);
-    const ip = await axios.get("https://geolocation-db.com/json/");
 
     if (status === "sent") {
       axios
-        .get(
-          `${baseUrl}/sent/${userId}/${general.toBase64(ip.data.IPv4)}`,
-          general.config
-        )
+        .get(`${baseUrl}/sent/${userId}`, general.config)
         .then((response) => {
           console.log(response.data);
           const requests = response.data.Data;
@@ -57,10 +53,7 @@ const Requests = () => {
         });
     } else if (status === "recieved") {
       axios
-        .get(
-          `${baseUrl}/recieved/${userId}/${general.toBase64(ip.data.IPv4)}`,
-          general.config
-        )
+        .get(`${baseUrl}/recieved/${userId}`, general.config)
         .then((response) => {
           console.log(response.data);
           const requests = response.data.Data;
@@ -86,10 +79,7 @@ const Requests = () => {
         });
     } else {
       axios
-        .get(
-          `${baseUrl}/sent/${userId}/${general.toBase64(ip.data.IPv4)}`,
-          general.config
-        )
+        .get(`${baseUrl}/sent/${userId}`, general.config)
         .then((response) => {
           console.log(response.data);
           const requests = response.data.Data;
@@ -117,13 +107,8 @@ const Requests = () => {
   };
 
   const sent = async () => {
-    const ip = await axios.get("https://geolocation-db.com/json/");
-
     axios
-      .get(
-        `${baseUrl}/sent/${userId}/${general.toBase64(ip.data.IPv4)}`,
-        general.config
-      )
+      .get(`${baseUrl}/sent/${userId}`, general.config)
       .then((response) => {
         console.log(response.data);
         const requests = response.data.Data;
@@ -148,13 +133,8 @@ const Requests = () => {
       });
   };
   const recieved = async () => {
-    const ip = await axios.get("https://geolocation-db.com/json/");
-
     axios
-      .get(
-        `${baseUrl}/recieved/${userId}/${general.toBase64(ip.data.IPv4)}`,
-        general.config
-      )
+      .get(`${baseUrl}/recieved/${userId}`, general.config)
       .then((response) => {
         console.log(response.data);
         const requests = response.data.Data;

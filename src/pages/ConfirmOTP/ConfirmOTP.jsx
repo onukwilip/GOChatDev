@@ -94,6 +94,12 @@ const ConfirmOTP = () => {
             //Get user IP address and log it into the database
             getUserIPAddress(OTPDetails?.email);
             localStorage.setItem("token", tokenResponse?.data?.access_token);
+            general.setConfig((prev) => ({
+              headers: {
+                ...prev?.headers,
+                Authorization: `Bearer ${tokenResponse?.data?.access_token}`,
+              },
+            }));
             sessionStorage.removeItem("OTP");
             navigate("/chat", { replace: true });
           } else {

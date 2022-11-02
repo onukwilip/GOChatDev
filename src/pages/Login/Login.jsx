@@ -16,6 +16,7 @@ const Login = () => {
     state: false,
     message: "",
   });
+  const [disabled, setDisabled] = useState(false);
   const general = useContext(General);
   const navigate = useNavigate();
   const apiPrefix = general.domain;
@@ -49,9 +50,12 @@ const Login = () => {
   };
 
   const onSubmit = (e) => {
+    setDisabled(true);
     axios
       .post(url, body, config)
       .then((res) => {
+        setDisabled(false);
+
         const user = res.data;
         if (!user.Response.UserExists) {
           //IF USER DOESN'T EXIST SET INVLID TO TRUE
@@ -88,7 +92,9 @@ const Login = () => {
         // console.log(res.data);
       })
       .catch((e) => {
-        // console.log(e);
+        console.log(e);
+        setDisabled(false);
+
         setErrorMessage({
           state: true,
           message: "Error connecting to the server, please try again...",
@@ -131,7 +137,9 @@ const Login = () => {
                   setPassword(e.target.value);
                 }}
               />
-              <Button>Sign in</Button>
+              <Button disabled={disabled}>
+                {disabled ? "Loading..." : "Sign in"}
+              </Button>
               {errorMessage.state && (
                 <p className="error">{errorMessage.message}</p>
               )}

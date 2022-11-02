@@ -3,12 +3,13 @@ import css from "./User.module.css";
 import dummy from "../../../assets/images/dummy-img.png";
 import axios from "axios";
 import { General } from "../../../context/GeneralContext";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Form, FormGroup } from "../../Form/Form";
 import { Button } from "../../Button/Button";
 import Loader from "../../Loader/Loader";
 import ServerError from "../../ServerError/ServerError";
 import { PostNotification } from "../Notifications/Notifications";
+import { ChatRoomProfile } from "../Sidebar/Sidebar";
 
 const Profile = ({ user }) => {
   const [requestStatus, setRequestStatus] = useState("");
@@ -335,7 +336,7 @@ const Profile = ({ user }) => {
                 </>
               ) : (
                 <>
-                  {requestStatus === 200 && (
+                  {requestStatus === 0 && (
                     <Button
                       onClick={sendRequest_User_User}
                       disabled={disabled.requestDisabled}
@@ -344,19 +345,19 @@ const Profile = ({ user }) => {
                       Add fella
                     </Button>
                   )}
-                  {requestStatus === 402 && (
+                  {requestStatus === 2 && (
                     <Button className={css["btn-danger"]} onClick={ignoreFella}>
                       <i className="fa-solid fa-user-slash"></i>
                       Ignore fella
                     </Button>
                   )}
-                  {requestStatus === 403 && (
+                  {requestStatus === 3 && (
                     <Button onClick={unIgnoreFella}>
                       <i className="fa-solid fa-user-plus"></i>
                       Unignore fella
                     </Button>
                   )}
-                  {requestStatus === 401 && (
+                  {requestStatus === 1 && (
                     <Button
                       className={css["btn-danger"]}
                       disabled={disabled.cancelDisabled}
@@ -369,7 +370,7 @@ const Profile = ({ user }) => {
                 </>
               )}
             </div>
-            {requestStatus !== 200 && requestStatus !== 401 && (
+            {requestStatus !== 0 && requestStatus !== 1 && (
               <div className={css["danger-zone"]}>
                 <h1>Danger Zone !</h1>
                 <Button className={css["btn-danger"]} onClick={blockFella}>
@@ -483,8 +484,8 @@ const EditUser = ({ user }) => {
 
   const FromDataHandler = (ip) => {
     const _config = {
-      ...config,
       headers: {
+        ...config?.headers,
         "Content-type": "multipart/formdata",
         "Access-control-allow-origin": "*",
       },
@@ -716,9 +717,87 @@ const Settings = ({ user }) => {
             details="Customise the look of GOChat"
             icon="fa fa-pen-fancy"
           ></Accordion>
+          <Accordion
+            title="Groups"
+            details="View and edit the list of groups you created"
+            icon="fa fa-users"
+          >
+            <Groups userid={user?.UserID} />
+          </Accordion>
         </div>
       </div>
     </>
+  );
+};
+
+const Groups = ({ userid }) => {
+  const navigate = useNavigate();
+  const [groups, setGroups] = useState([]);
+  const [loader, setLoader] = useState(false);
+  const [error, setError] = useState(false);
+  const general = useContext(General);
+
+  const getGroups = async () => {
+    setLoader(true);
+    setError(false);
+    const url = `${general.domain}api/chatroom/user-groups`;
+    const response = await axios.get(url, general.config).catch((e) => {
+      setLoader(false);
+      setError(true);
+    });
+
+    if (response) {
+      setError(false);
+      setLoader(false);
+      setGroups(response.data?.Data);
+    }
+  };
+
+  const newGroup = async () => {
+    const componentToRender = {
+      component: "newGroup",
+      values: {},
+    };
+
+    sessionStorage.setItem(
+      "componentToRender",
+      JSON.stringify(componentToRender)
+    );
+    general.setModalState("true");
+    sessionStorage.setItem("modalState", "true");
+  };
+
+  useEffect(() => {
+    getGroups();
+  }, []);
+
+  return (
+    <div>
+      {loader ? (
+        <Loader />
+      ) : error ? (
+        <ServerError />
+      ) : (
+        <>
+          {groups?.length > 0 ? (
+            <>
+              {groups?.map((eachGroup) => (
+                <ChatRoomProfile
+                  items={eachGroup}
+                  addUserIcon={false}
+                  onClick={() => {
+                    navigate(`/chat/group/${eachGroup?.ChatRoomID}`);
+                  }}
+                />
+              ))}
+            </>
+          ) : (
+            <p align="center">No group found...</p>
+          )}
+          <Button onClick={newGroup}>+ Add new group</Button>
+        </>
+      )}
+    </div>
   );
 };
 

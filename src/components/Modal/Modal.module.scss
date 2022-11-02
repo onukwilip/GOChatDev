@@ -18,7 +18,7 @@
     max-width: 500px;
     word-wrap: break-word;
     min-height: 200px;
-    max-height: 400px;
+    max-height: 80vh;
     overflow-y: auto;
     @include flex(center, center, 0);
   }
@@ -55,5 +55,128 @@
     i {
       color: white;
     }
+  }
+}
+
+.new-group {
+  width: 400px;
+  .password {
+    width: 100%;
+    @include flex(start, flex-start, 0.5rem);
+    flex-direction: column;
+  }
+  .img-upload {
+    width: 100%;
+    height: 200px;
+    background-color: rgba(whitesmoke, 0.5);
+    border-radius: 10px;
+    border: 5px double $button-hover-default;
+    cursor: pointer;
+    @include flex(center, center, 1rem);
+    flex-direction: column;
+    color: rgba(black, 0.6);
+    i {
+      transform: scale(3);
+    }
+  }
+  .img-container {
+    position: relative;
+    width: 100%;
+    @include flex(stretch, flex-start, 0);
+    img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+    label {
+      padding: $padding;
+      border-radius: 50%;
+      position: absolute;
+      background-color: #fff;
+      bottom: -0.5rem;
+      right: -0.5rem;
+      box-shadow: $box-shadow;
+      cursor: pointer;
+      transition: 0.2s;
+      &:hover {
+        transform: scale(1.2);
+      }
+    }
+  }
+}
+
+.invite {
+  @include flex(center, center, 1rem);
+  flex-direction: column;
+  .options {
+    @include flex(center, flex-start, 1rem);
+    flex-direction: column;
+    label {
+      @include flex(flex-start, flex-start, 0);
+      flex-direction: column;
+    }
+  }
+
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+  }
+
+  /* Hide default HTML checkbox */
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  /* The slider */
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
+  }
+
+  input:checked + .slider {
+    background-color: #2196f3;
+  }
+
+  input:focus + .slider {
+    box-shadow: 0 0 1px #2196f3;
+  }
+
+  input:checked + .slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+  }
+
+  /* Rounded sliders */
+  .slider.round {
+    border-radius: 34px;
+  }
+
+  .slider.round:before {
+    border-radius: 50%;
   }
 }

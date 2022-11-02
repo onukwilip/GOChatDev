@@ -8,6 +8,8 @@ import { PostNotification } from "../ChatEngine/Notifications/Notifications";
 import { Form, FormGroup } from "../Form/Form";
 import Glassmorphism from "../Glassmorphism/Glassmorphism";
 import css from "./Modal.module.css";
+import { v4 as uuidV4 } from "uuid";
+import { useNavigate } from "react-router-dom";
 
 const RemoveFella = ({ items }) => {
   const general = useContext(General);
@@ -22,6 +24,7 @@ const RemoveFella = ({ items }) => {
   const [disabled, setDisabled] = useState(false);
 
   const blockFella = async () => {
+    setDisabled(true);
     const ip = await axios
       .get("https://geolocation-db.com/json/")
       .catch((e) => {
@@ -31,10 +34,14 @@ const RemoveFella = ({ items }) => {
     const base64IP = general.toBase64(ip?.data?.IPv4);
     const base64Password = general.toBase64(password);
 
-    const response = await axios.delete(
-      `${url}/${items?.From_ID}/${items?.To_ID}/${base64IP}/${base64Password}/block`,
-      { ...config }
-    );
+    const response = await axios
+      .delete(
+        `${url}/${items?.From_ID}/${items?.To_ID}/${base64IP}/${base64Password}/block`,
+        { ...config }
+      )
+      .catch((e) => {
+        setDisabled(false);
+      });
 
     if (response) {
       let senderName;
@@ -87,6 +94,8 @@ const RemoveFella = ({ items }) => {
       general.postNotification(body);
 
       if (response.data.ResponseCode === 200) {
+        setDisabled(false);
+
         setError({
           state: false,
           message: "",
@@ -96,11 +105,15 @@ const RemoveFella = ({ items }) => {
         sessionStorage.setItem("modalState", "false");
         sessionStorage.removeItem("componentToRender");
       } else {
+        setDisabled(false);
+
         setError({
           state: true,
           message: "Incorrect password!",
         });
       }
+    } else {
+      setDisabled(false);
     }
 
     console.log(response);
@@ -127,9 +140,13 @@ const RemoveFella = ({ items }) => {
           />
           {error.state && <p className="error">{error.message}</p>}
 
-          <Button className={css["btn-danger"]} onClick={blockFella}>
+          <Button
+            className={css["btn-danger"]}
+            disabled={disabled}
+            onClick={blockFella}
+          >
             <i className="fa-solid fa-ban"></i>
-            Block Fella
+            {disabled ? "Loading" : "Block Fella"}
           </Button>
         </Form>
       </div>
@@ -212,6 +229,224 @@ const EditChat = ({ items }) => {
   );
 };
 
+const NewGroup = () => {
+  const general = useContext(General);
+  const navigate = useNavigate();
+  const url = `${general.domain}api/chatroom`;
+  const [src, setSrc] = useState("");
+  const [userDetailsDisabled, setUserDetailsDisabled] = useState(false);
+  const [accountDetails, setAccountDetails] = useState({
+    ChatRoomName: "",
+    Description: "",
+    ProfilePicture: "",
+  });
+  const [error, setError] = useState({
+    state: false,
+    message: "",
+  });
+
+  const fileOnChangeHandler = (e) => {
+    setAccountDetails((prev) => ({
+      ...prev,
+      ProfilePicture: e.target.files[0],
+    }));
+    const file = e.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = (arg) => {
+      setSrc(arg.target.result);
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  const submitDetails = async (chatroom) => {
+    const response = await axios
+      .post(
+        url,
+        {
+          ChatRoomID: chatroom?.chatRoomID,
+          ChatRoomName: chatroom?.chatRoomName,
+          Description: chatroom?.description,
+        },
+        general.config
+      )
+      .catch((e) => {});
+
+    return response;
+  };
+
+  const submitImage = async (chatroomid) => {
+    const config = {
+      headers: {
+        ...general.config.headers,
+        "Content-type": "multipart/form-data",
+      },
+    };
+
+    const formData = new FormData();
+
+    formData.append("body", accountDetails.ProfilePicture);
+
+    const response = await axios
+      .put(`${url}/${chatroomid}`, formData, config)
+      .catch((e) => {});
+
+    return response;
+  };
+
+  const onSubmitHandler = async () => {
+    setUserDetailsDisabled(true);
+
+    const chatroomId = `CHATROOM_${uuidV4()}`;
+    const chatroom = {
+      chatRoomID: chatroomId,
+      chatRoomName: accountDetails.ChatRoomName,
+      description: accountDetails.Description,
+    };
+    const detailsResponse = await submitDetails(chatroom).catch((e) => {
+      setUserDetailsDisabled(false);
+      setError({
+        state: true,
+        message: "There was an error creating your group, please try again",
+      });
+    });
+
+    if (detailsResponse.data?.ResponseCode === 200) {
+      // console.log("I got here and the details response code is 200");
+      if (
+        accountDetails.ProfilePicture !== null &&
+        accountDetails.ProfilePicture !== "" &&
+        accountDetails.ProfilePicture !== undefined
+      ) {
+        const imageResponse = await submitImage(chatroom.chatRoomID).catch(
+          (e) => {
+            setUserDetailsDisabled(false);
+            // console.log(
+            //   "I got here and there is an issue in uploading the image"
+            // );
+          }
+        );
+        if (imageResponse) {
+          setUserDetailsDisabled(false);
+          // console.log("I got here, details and image uploaded successfully");
+        }
+        setError({
+          state: false,
+          message: "",
+        });
+        //NAVIGATE TO GROUP DETAILS AND CLOSE MODAL
+        general.setModalState("false");
+        sessionStorage.setItem("modalState", "false");
+        sessionStorage.removeItem("componentToRender");
+        navigate(`chat/group/${chatroom.chatRoomID}`);
+      } else {
+        // console.log(
+        //   "I got here and the details response code is not " +
+        //     200 +
+        //     " but is" +
+        //     detailsResponse?.data?.ResponseCode
+        // );
+
+        setUserDetailsDisabled(false);
+
+        setError({
+          state: false,
+          message: "",
+        });
+        //NAVIGATE TO GROUP DETAILS AND CLOSE MODAL
+        general.setModalState("false");
+        sessionStorage.setItem("modalState", "false");
+        sessionStorage.removeItem("componentToRender");
+        navigate(`chat/group/${chatroom.chatRoomID}`);
+      }
+    } else {
+      setUserDetailsDisabled(false);
+      setError({
+        state: true,
+        message: "There was an error creating your group, please try again",
+      });
+    }
+  };
+
+  return (
+    <Form className={css["new-group"]} onSubmit={onSubmitHandler}>
+      {accountDetails.ProfilePicture === undefined ||
+      accountDetails.ProfilePicture === "" ||
+      accountDetails.ProfilePicture === null ? (
+        <label className={css["img-upload"]}>
+          <input type="file" hidden onChange={fileOnChangeHandler} />
+          <div>
+            <i className="fa-solid fa-cloud-arrow-up"></i>
+          </div>
+          <h3>Upload group picture</h3>
+        </label>
+      ) : (
+        <div className={css["img-container"]}>
+          <img src={src} alt="" />
+          <label>
+            <input type="file" hidden onChange={fileOnChangeHandler} />
+            <i className="fa fa-pencil"></i>
+          </label>
+        </div>
+      )}
+
+      <FormGroup
+        icon="fa fa-user"
+        value={accountDetails.ChatRoomName}
+        onChange={(e) => {
+          setAccountDetails((prev) => ({
+            ...prev,
+            ChatRoomName: e.target.value,
+          }));
+        }}
+        placeholder="Enter group name..."
+        disabled={userDetailsDisabled}
+        required={true}
+      />
+      <Button disabled={userDetailsDisabled}>
+        {userDetailsDisabled ? "Creating..." : "Create"}
+      </Button>
+    </Form>
+  );
+};
+
+const InviteMembers = ({ items }) => {
+  return (
+    <div className={css.invite}>
+      <div className={css.options}>
+        <label htmlFor="fellasOnly">
+          Fella's only(Display only a list of users in which you are fella's
+          with) :
+          <div className={css.switch}>
+            <input
+              type="radio"
+              name="selecType"
+              value={"fellasOnly"}
+              id="fellasOnly"
+            />
+            <span className={`${css.slider} ${css.round}`}></span>
+          </div>
+        </label>
+        <label htmlFor="allUsers">
+          All users(Display a list of random users which are not members of this
+          group) :
+          <div className={css.switch}>
+            <input
+              type="radio"
+              name="selecType"
+              value={"allUsers"}
+              id="allUsers"
+            />
+            <span className={`${css.slider} ${css.round}`}></span>
+          </div>
+        </label>
+      </div>
+      Invite new members {items?.groupid}
+    </div>
+  );
+};
+
 const Modal = () => {
   const general = useContext(General);
   const [componentToRender, setComponentToRender] = useState({
@@ -245,6 +480,16 @@ const Modal = () => {
           {componentToRender.component === "EditChat" && (
             <>
               <EditChat items={componentToRender.values} />
+            </>
+          )}
+          {componentToRender.component === "newGroup" && (
+            <>
+              <NewGroup />
+            </>
+          )}
+          {componentToRender.component === "invite" && (
+            <>
+              <InviteMembers items={componentToRender.values} />
             </>
           )}
         </Glassmorphism>

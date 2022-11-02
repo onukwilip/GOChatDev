@@ -84,7 +84,7 @@ function App() {
         .get(`${url}/${general.toBase64(ipAddress)}`, general.config)
         .then((res) => {
           setLoading(false);
-         
+
           const user = res.data;
           //IF USER DOESN'T EXIST
           if (

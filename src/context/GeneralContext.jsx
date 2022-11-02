@@ -1,6 +1,8 @@
 import axios from "axios";
 import React, { createContext, useEffect, useState } from "react";
 
+//C:\NodeJsPractice\go-chat-node-server
+
 export const General = createContext({
   domain: ``,
   config: "",
@@ -103,13 +105,13 @@ const GeneralContext = (props) => {
   //   },
   // });
 
-  const config = {
+  const [config, setConfig] = useState({
     headers: {
       "Access-control-allow-origin": "*",
       "Content-type": "application/json",
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
-  };
+  });
 
   const fromBase64 = (string) => {
     return window.atob(string);
@@ -146,10 +148,6 @@ const GeneralContext = (props) => {
   const postNotification = async (body) => {
     const url = `${domain}api/notification`;
 
-    const ip = await axios
-      .get("https://geolocation-db.com/json/")
-      .catch((e) => {});
-
     const config = {
       headers: {
         "Access-control-allow-origin": "*",
@@ -185,7 +183,7 @@ const GeneralContext = (props) => {
   const context = {
     domain: domain,
     config: config,
-    // setConfig: setConfig,
+    setConfig: setConfig,
     emailToSendOTP: emailToSendOTP,
     setEmailToSendOTP: setEmailToSendOTP,
     OTPconfirmType: OTPConfirmType,

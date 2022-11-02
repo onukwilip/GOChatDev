@@ -8,8 +8,9 @@ import { General } from "../../../context/GeneralContext";
 import Loader from "../../Loader/Loader";
 import ServerError from "../../ServerError/ServerError";
 import { io } from "socket.io-client";
+import { socketDomain } from "../../ExternalFunctions";
 
-const discussionSocket = io.connect("http://localhost:3002/discussion");
+const discussionSocket = io.connect(`${socketDomain}/discussion`);
 
 export const sendDiscussion = () => {
   discussionSocket.emit("new-discussion");

@@ -13,6 +13,7 @@ import AllContacts from "../../components/ChatEngine/AllContacts/AllContacts";
 import User from "../../components/ChatEngine/User/User";
 import { Request } from "../../components/ChatEngine/Sidebar/Sidebar";
 import Requests from "../../components/ChatEngine/Requests/Requests";
+import Group from "../../components/ChatEngine/Groups/Groups";
 
 const ChatEngine = () => {
   const [mobileMenu, setMobileMenu] = useState(false);
@@ -94,6 +95,7 @@ const ChatEngine = () => {
                   <Route path="user/:userid" element={<User />} />
                   <Route path="requests/" element={<Requests />} />
                   <Route path="requests/:status" element={<Requests />} />
+                  <Route path="group/:groupid" element={<Group />} />
                   {/* <Route path="*" element={<Contacts />} /> */}
                 </Routes>
               </div>
@@ -126,6 +128,7 @@ const ChatEngine = () => {
               />
               <Route path="requests/" element={<Requests />} />
               <Route path="requests/:status" element={<Requests />} />
+              <Route path="group/:groupid" element={<Group />} />
             </Routes>
           </div>
         </div>

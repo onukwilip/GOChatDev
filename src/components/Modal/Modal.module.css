@@ -20,7 +20,7 @@
   max-width: 500px;
   word-wrap: break-word;
   min-height: 200px;
-  max-height: 400px;
+  max-height: 80vh;
   overflow-y: auto;
   display: flex;
   justify-content: center;
@@ -67,4 +67,133 @@
 }
 .edit-chat .send i {
   color: white;
+}
+
+.new-group {
+  width: 400px;
+}
+.new-group .password {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: start;
+  gap: 0.5rem;
+  flex-direction: column;
+}
+.new-group .img-upload {
+  width: 100%;
+  height: 200px;
+  background-color: rgba(245, 245, 245, 0.5);
+  border-radius: 10px;
+  border: 5px double rgba(13, 153, 235, 0.7);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  flex-direction: column;
+  color: rgba(0, 0, 0, 0.6);
+}
+.new-group .img-upload i {
+  transform: scale(3);
+}
+.new-group .img-container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: stretch;
+  gap: 0;
+}
+.new-group .img-container img {
+  width: 100%;
+  height: 200px;
+  -o-object-fit: cover;
+     object-fit: cover;
+  border-radius: 10px;
+}
+.new-group .img-container label {
+  padding: 10px;
+  border-radius: 50%;
+  position: absolute;
+  background-color: #fff;
+  bottom: -0.5rem;
+  right: -0.5rem;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: 0.2s;
+}
+.new-group .img-container label:hover {
+  transform: scale(1.2);
+}
+
+.invite {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  flex-direction: column;
+  /* Hide default HTML checkbox */
+  /* The slider */
+  /* Rounded sliders */
+}
+.invite .options {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 1rem;
+  flex-direction: column;
+}
+.invite .options label {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 0;
+  flex-direction: column;
+}
+.invite .switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+.invite .switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.invite .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+}
+.invite .slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+}
+.invite input:checked + .slider {
+  background-color: #2196f3;
+}
+.invite input:focus + .slider {
+  box-shadow: 0 0 1px #2196f3;
+}
+.invite input:checked + .slider:before {
+  transform: translateX(26px);
+}
+.invite .slider.round {
+  border-radius: 34px;
+}
+.invite .slider.round:before {
+  border-radius: 50%;
 }/*# sourceMappingURL=Modal.module.css.map */

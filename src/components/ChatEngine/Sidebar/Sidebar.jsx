@@ -91,6 +91,7 @@ export const ChatRoomMapComponents = (props) => {
                   className={css.large}
                   addUserIcon={props.addUserIcon}
                   addMessagesCount={props.addMessagesCount}
+                  chatroom={true}
                 />
                 <ChatRoomProfile
                   onClick={props.onMediumClick}
@@ -98,6 +99,7 @@ export const ChatRoomMapComponents = (props) => {
                   className={css.medium}
                   addUserIcon={props.addUserIcon}
                   addMessagesCount={props.addMessagesCount}
+                  chatroom={true}
                 />
               </>
             );
@@ -193,17 +195,11 @@ export const UserMapComponents = (props) => {
       <div className={css["all-user-components"]}>
         {allItems.length > 0 ? (
           allItems.map((eachItem, i) => {
-            if (eachItem.Type === "group") {
+            if (eachItem.Type === "Group") {
               return (
                 <>
                   <GroupProfile
                     items={eachItem}
-                    className={css.large}
-                    addUserIcon={props.addUserIcon}
-                  />
-                  <GroupProfile
-                    items={eachItem}
-                    className={css.medium}
                     addUserIcon={props.addUserIcon}
                   />
                 </>
@@ -213,12 +209,6 @@ export const UserMapComponents = (props) => {
                 <>
                   <UserProfile
                     items={eachItem}
-                    className={css.large}
-                    addUserIcon={props.addUserIcon}
-                  />
-                  <UserProfile
-                    items={eachItem}
-                    className={css.medium}
                     addUserIcon={props.addUserIcon}
                   />
                 </>
@@ -278,17 +268,26 @@ export const RequestMapComponents = (props) => {
   );
 };
 
-export const ChatRoomProfile = ({ items, className, addUserIcon, onClick }) => {
+export const ChatRoomProfile = ({
+  items,
+  className,
+  addUserIcon,
+  onClick,
+  chatroom,
+}) => {
   const general = useContext(General);
 
   const onClickHandler = () => {
     onClick();
-    const chatRoom = {
-      ...items,
-    };
-    sessionStorage.setItem("chatRoom", JSON.stringify(chatRoom));
-    console.log(chatRoom);
-    general.setRefreshState((prev) => !prev);
+    if (chatroom) {
+      const chatRoom = {
+        ...items,
+      };
+      sessionStorage.setItem("chatRoom", JSON.stringify(chatRoom));
+      console.log(chatRoom);
+      general.setRefreshState((prev) => !prev);
+    } else {
+    }
   };
 
   return (
@@ -513,7 +512,7 @@ export const GroupProfile = ({ items, className, addUserIcon }) => {
   const navigate = useNavigate();
 
   const onClickHandler = () => {
-    navigate(`/chat/group/${general.toBase64(items.ChatRoomID)}`);
+    navigate(`/chat/group/${items?.ChatRoomID}`);
   };
 
   return (
@@ -551,10 +550,8 @@ export const SentRequest = ({ items, className }) => {
   const url = `${general.domain}api/requests`;
 
   const onDeleteClickHandler = async () => {
-    const ip = await axios.get("https://geolocation-db.com/json/");
-
     axios
-      .delete(`${url}/${userId}/${general.toBase64(ip.data.IPv4)}/${items?.ID}`)
+      .delete(`${url}/${userId}/${items?.ID}`, general.config)
       .then((response) => {
         // console.log("Delete request", response.data);
         general.setRefreshState((prev) => !prev);
@@ -608,34 +605,233 @@ export const RecievedRequest = ({ items, className }) => {
   const [disabled, setDisabled] = useState(false);
 
   const onDeleteClickHandler = async () => {
-    const ip = await axios.get("https://geolocation-db.com/json/");
+    const response = await axios
+      .delete(`${url}/${userId}/${items?.ID}`, general.config)
 
-    axios
-      .delete(`${url}/${userId}/${general.toBase64(ip.data.IPv4)}/${items?.ID}`)
-      .then((response) => {
-        // console.log("Delete request", response.data);
-        general.setRefreshState((prev) => !prev);
-      })
       .catch((e) => {});
+
+    if (response) {
+      // console.log("Delete request", response.data);
+      if (items?.From_Type === "User" && items?.To_Type === "User") {
+        const body = [
+          {
+            ID: 0,
+            UserID: items?.To?.UserID,
+            IdentityToRender: {
+              IdentityToRenderID: items?.From?.UserID,
+              IdentityToRenderName: null,
+              IdentityToRenderProfilePicture: null,
+              IsOnline: false,
+            },
+            Message: `You declined a request sent by to ${items?.From?.UserName}`,
+            Type: "User",
+            Target: "requests",
+            Viewed: false,
+          },
+          {
+            ID: 0,
+            UserID: items?.From?.UserID,
+            IdentityToRender: {
+              IdentityToRenderID: items?.To?.UserID,
+              IdentityToRenderName: null,
+              IdentityToRenderProfilePicture: null,
+              IsOnline: false,
+            },
+            Message: `${items?.To?.UserName} declined your request`,
+            Type: "User",
+            Target: "requests",
+            Viewed: false,
+          },
+        ];
+        general.postNotification(body);
+      }
+      if (items?.From_Type === "User" && items?.To_Type === "Group") {
+        const body = [
+          {
+            ID: 0,
+            UserID: items?.To?.UserID,
+            IdentityToRender: {
+              IdentityToRenderID: items?.From?.UserID,
+              IdentityToRenderName: null,
+              IdentityToRenderProfilePicture: null,
+              IsOnline: false,
+            },
+            Message: `You declined a request sent by ${items?.From?.UserName}`,
+            Type: "User",
+            Target: "requests",
+            Viewed: false,
+          },
+          {
+            ID: 0,
+            UserID: items?.From?.UserID,
+            IdentityToRender: {
+              IdentityToRenderID: items?.To?.UserID,
+              IdentityToRenderName: null,
+              IdentityToRenderProfilePicture: null,
+              IsOnline: false,
+            },
+            Message: `${items?.To?.UserName} declined your request`,
+            Type: "Group",
+            Target: "requests",
+            Viewed: false,
+          },
+        ];
+        general.postNotification(body);
+      }
+
+      if (items?.From_Type === "Group" && items?.To_Type === "User") {
+        const body = [
+          {
+            ID: 0,
+            UserID: items?.To?.UserID,
+            IdentityToRender: {
+              IdentityToRenderID: items?.From?.UserID,
+              IdentityToRenderName: null,
+              IdentityToRenderProfilePicture: null,
+              IsOnline: false,
+            },
+            Message: `You declined a request sent by ${items?.From?.UserName}`,
+            Type: "Group",
+            Target: "requests",
+            Viewed: false,
+          },
+          {
+            ID: 0,
+            UserID: items?.From?.UserID,
+            IdentityToRender: {
+              IdentityToRenderID: items?.To?.UserID,
+              IdentityToRenderName: null,
+              IdentityToRenderProfilePicture: null,
+              IsOnline: false,
+            },
+            Message: `${items?.To?.UserName} declined your invitation`,
+            Type: "User",
+            Target: "requests",
+            Viewed: false,
+          },
+        ];
+        general.postNotification(body);
+      }
+
+      general.setRefreshState((prev) => !prev);
+    }
   };
 
   const onAcceptHandler = async () => {
     setDisabled(true);
 
-    const ip = await axios.get("https://geolocation-db.com/json/");
-
-    axios
-      .post(
-        `${url}/accept/${userId}/${general.toBase64(ip.data.IPv4)}/${items?.ID}`
-      )
-      .then((response) => {
-        console.log("Accept request", response.data);
-        setDisabled(false);
-        general.setRefreshState((prev) => !prev);
-      })
+    const response = await axios
+      .post(`${url}/accept/${userId}/${items?.ID}`, {}, general.config)
       .catch((e) => {
         setDisabled(false);
       });
+
+    if (response) {
+      console.log("Accept request", response.data);
+      setDisabled(false);
+
+      if (items?.From_Type === "User" && items?.To_Type === "User") {
+        const body = [
+          {
+            ID: 0,
+            UserID: items?.To?.UserID,
+            IdentityToRender: {
+              IdentityToRenderID: items?.From?.UserID,
+              IdentityToRenderName: null,
+              IdentityToRenderProfilePicture: null,
+              IsOnline: false,
+            },
+            Message: `You accepted ${items?.From?.UserName} request `,
+            Type: "User",
+            Target: "requests",
+            Viewed: false,
+          },
+          {
+            ID: 0,
+            UserID: items?.From?.UserID,
+            IdentityToRender: {
+              IdentityToRenderID: items?.To?.UserID,
+              IdentityToRenderName: null,
+              IdentityToRenderProfilePicture: null,
+              IsOnline: false,
+            },
+            Message: `${items?.To?.UserName} accepted your request`,
+            Type: "User",
+            Target: "requests",
+            Viewed: false,
+          },
+        ];
+        general.postNotification(body);
+      }
+      if (items?.From_Type === "User" && items?.To_Type === "Group") {
+        const body = [
+          {
+            ID: 0,
+            UserID: items?.To?.UserID,
+            IdentityToRender: {
+              IdentityToRenderID: items?.From?.UserID,
+              IdentityToRenderName: null,
+              IdentityToRenderProfilePicture: null,
+              IsOnline: false,
+            },
+            Message: `You accepted ${items?.From?.UserName} request`,
+            Type: "User",
+            Target: "requests",
+            Viewed: false,
+          },
+          {
+            ID: 0,
+            UserID: items?.From?.UserID,
+            IdentityToRender: {
+              IdentityToRenderID: items?.To?.UserID,
+              IdentityToRenderName: null,
+              IdentityToRenderProfilePicture: null,
+              IsOnline: false,
+            },
+            Message: `${items?.To?.UserName} accepted your request`,
+            Type: "Group",
+            Target: "requests",
+            Viewed: false,
+          },
+        ];
+        general.postNotification(body);
+      }
+      if (items?.From_Type === "Group" && items?.To_Type === "User") {
+        const body = [
+          {
+            ID: 0,
+            UserID: items?.To?.UserID,
+            IdentityToRender: {
+              IdentityToRenderID: items?.From?.UserID,
+              IdentityToRenderName: null,
+              IdentityToRenderProfilePicture: null,
+              IsOnline: false,
+            },
+            Message: `You accepted ${items?.From?.UserName} invitation`,
+            Type: "Group",
+            Target: "requests",
+            Viewed: false,
+          },
+          {
+            ID: 0,
+            UserID: items?.From?.UserID,
+            IdentityToRender: {
+              IdentityToRenderID: items?.To?.UserID,
+              IdentityToRenderName: null,
+              IdentityToRenderProfilePicture: null,
+              IsOnline: false,
+            },
+            Message: `${items?.To?.UserName} accepted your invitation`,
+            Type: "User",
+            Target: "requests",
+            Viewed: false,
+          },
+        ];
+        general.postNotification(body);
+      }
+
+      general.setRefreshState((prev) => !prev);
+    }
   };
 
   useEffect(() => {
