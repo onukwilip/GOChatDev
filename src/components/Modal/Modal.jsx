@@ -10,6 +10,8 @@ import Glassmorphism from "../Glassmorphism/Glassmorphism";
 import css from "./Modal.module.css";
 import { v4 as uuidV4 } from "uuid";
 import { useNavigate } from "react-router-dom";
+import dummy from "../../assets/images/dummy-img.png";
+import NoItem from "../NoItem/NoItem";
 
 const RemoveFella = ({ items }) => {
   const general = useContext(General);
@@ -411,38 +413,364 @@ const NewGroup = () => {
   );
 };
 
+const UserProfile = ({ items, className, onChange, removeItem }) => {
+  const general = useContext(General);
+  const onCheckChanged = (e) => {
+    if (e.target?.checked) {
+      onChange(items);
+    } else {
+      removeItem(items);
+    }
+  };
+  return (
+    <section className={`${css["sidebar-user-profile"]} ${className}`}>
+      <div className={css["img-container"]}>
+        <img
+          src={
+            items?.ProfilePicture === null || items?.ProfilePicture === ""
+              ? dummy
+              : items?.ProfilePicture
+          }
+          alt=""
+        />
+        <div
+          className={`${css.status} ${
+            items?.IsOnline ? css.online : css.offline
+          }`}
+        ></div>
+      </div>
+      <div className={css["details"]}>
+        <p className={css["name"]}>{items?.UserName}</p>
+        <p className={css["about"]}>
+          {items?.Description?.length > 50
+            ? items?.Description.slice(0, 50) + "..."
+            : items?.Description}
+        </p>
+      </div>
+      <label>
+        <div className={"switch"}>
+          <input
+            type="checkbox"
+            name={items?.UserID?.split("-")[0]}
+            value={"user"}
+            id="selectUser"
+            onChange={onCheckChanged}
+          />
+          <span className={"slider round"}></span>
+        </div>
+      </label>
+    </section>
+  );
+};
+
 const InviteMembers = ({ items }) => {
+  const general = useContext(General);
+  const url = `${general.domain}api/chatroom`;
+  const [myFellas, setMyFellas] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
+  const [backupUsers, setBackupUsers] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [itemsToSubmit, setItemsToSubmit] = useState([]);
+  const [disabled, setDisabled] = useState();
+  const senderId = localStorage.getItem("UserId");
+
+  const getMyFellas = async () => {
+    const response = await axios
+      .get(`${url}/${items?.groupid}/fellas/group`, general.config)
+      .catch((e) => {});
+    if (response) {
+      const data = response?.data?.Data;
+      if (data?.length > 0) {
+        setMyFellas(data);
+        setUsers(data);
+        setBackupUsers(data);
+        console.log("My fellas", data);
+      }
+    }
+  };
+
+  const getAllUsers = async () => {
+    const response = await axios
+      .get(`${url}/${items?.groupid}/users/group`, general.config)
+      .catch((e) => {});
+    if (response) {
+      const data = response?.data?.Data;
+      if (data?.length > 0) {
+        setAllUsers(data);
+        console.log("All users", data);
+      }
+    }
+  };
+
+  const selectType = (e) => {
+    if (e?.target?.id === "fellasOnly" && e?.target?.checked) {
+      setBackupUsers(myFellas);
+      setUsers(myFellas);
+    } else if (e?.target?.id === "allUsers" && e?.target?.checked) {
+      setBackupUsers(allUsers);
+      setUsers(allUsers);
+    }
+    console.log(e?.target?.id);
+    console.log(e?.target?.checked);
+  };
+
+  const removeItemHandler = (newItem) => {
+    setItemsToSubmit((prev) =>
+      prev?.filter((prevItems) => prevItems?.UserID !== newItem?.UserID)
+    );
+  };
+
+  const onChangeHandler = (newItem) => {
+    const find = itemsToSubmit.filter(
+      (item) => item?.UserID === newItem?.UserID
+    );
+    if (find?.length > 0) {
+    } else {
+      setItemsToSubmit((prev) => [...prev, { ...newItem }]);
+      console.log(newItem);
+    }
+  };
+
+  const selectAll = (e) => {
+    if (e?.target?.checked) {
+      const allItems = document.querySelectorAll("#selectUser");
+      for (let i = 0; i < allItems.length; i++) {
+        allItems[i].checked = true;
+      }
+
+      setItemsToSubmit([...users]);
+      console.log(users);
+    } else {
+      const allItems = document.querySelectorAll("#selectUser");
+      for (let i = 0; i < allItems.length; i++) {
+        allItems[i].checked = false;
+      }
+
+      for (const user of users) {
+        setItemsToSubmit((prev) =>
+          prev?.filter((prevItems) => prevItems?.UserID !== user?.UserID)
+        );
+      }
+    }
+  };
+
+  const removeOne = (userid) => {
+    const selected = document.getElementsByName(userid?.split("-")[0]);
+    for (const name of selected) {
+      name.checked = false;
+    }
+
+    setItemsToSubmit((prev) =>
+      prev?.filter((prevItems) => prevItems?.UserID !== userid)
+    );
+  };
+
+  const searchHandler = (string) => {
+    if (string !== "" && string !== null) {
+      setUsers((prev) =>
+        prev.filter((eachUser) =>
+          eachUser?.UserName?.toLowerCase()?.includes(string?.toLowerCase())
+        )
+      );
+    } else {
+      setUsers(backupUsers);
+    }
+  };
+
+  const sendRequest_Group_User = async (reciever) => {
+    // setDisabled(true);
+
+    const userResponse = await axios
+      .get(`${general.domain}api/user/${senderId}`, { ...general.config })
+      .catch((e) => {
+        //  console.log(e);
+      });
+
+    let sender;
+
+    userResponse?.data?.Data?.map((eachUser) => {
+      sender = eachUser;
+    });
+
+    const body = {
+      From: { UserID: items?.groupid },
+      To: { UserID: reciever?.UserID },
+      Message: `Hello...My name is ${sender?.UserName}, and i would to invite you to this group`,
+      From_Type: "Group",
+      To_Type: "User",
+    };
+
+    const _url = `${general.domain}api/request`;
+
+    const response = await axios
+      .post(_url, body, { ...general.config })
+      .catch((e) => {
+        // setDisabled(false)
+        // console.log(e);
+      });
+
+    if (response) {
+      const body = [
+        {
+          ID: 0,
+          UserID: items?.groupid,
+          IdentityToRender: {
+            IdentityToRenderID: reciever?.UserID,
+            IdentityToRenderName: null,
+            IdentityToRenderProfilePicture: null,
+            IsOnline: false,
+          },
+          Message: `You sent an invitation to ${reciever?.UserName}`,
+          Type: "User",
+          Target: "",
+          Viewed: false,
+        },
+        {
+          ID: 0,
+          UserID: reciever?.UserID,
+          IdentityToRender: {
+            IdentityToRenderID: items?.groupid,
+            IdentityToRenderName: null,
+            IdentityToRenderProfilePicture: null,
+            IsOnline: false,
+          },
+          Message: `You recieved a request from ${items?.groupName}`,
+          Type: "Group",
+          Target: "requests",
+          Viewed: false,
+        },
+      ];
+      general.postNotification(body);
+
+      // setDisabled(false);
+    }
+
+    console.log(response);
+  };
+
+  const sendInvitations = async () => {
+    setDisabled(true);
+    for (let i = 0; i < itemsToSubmit.length; i++) {
+      const response = await sendRequest_Group_User(itemsToSubmit[i]);
+      console.log(
+        `Invitation to ${itemsToSubmit[i]?.UserName} sent successfully`
+      );
+
+      if (i === itemsToSubmit.length - 1) {
+        general.setModalState("false");
+        sessionStorage.setItem("modalState", "false");
+        sessionStorage.removeItem("componentToRender");
+
+        console.log("Last invitation sent successfully");
+        break;
+      }
+    }
+  };
+
+  useEffect(() => {
+    getAllUsers();
+    getMyFellas();
+  }, []);
+
   return (
     <div className={css.invite}>
+      <h1>Invite new members</h1>
+      {itemsToSubmit?.length > 0 && (
+        <div className={css["members-to-add"]}>
+          {itemsToSubmit?.map((eachItem, i) => (
+            <div key={i} className={css["each-member"]}>
+              <em>{eachItem?.UserName}</em>
+              <em
+                className="error"
+                style={{ fontWeight: "bold", cursor: "pointer" }}
+                onClick={() => {
+                  removeOne(eachItem?.UserID);
+                }}
+              >
+                X
+              </em>
+            </div>
+          ))}
+        </div>
+      )}
       <div className={css.options}>
         <label htmlFor="fellasOnly">
           Fella's only(Display only a list of users in which you are fella's
-          with) :
+          with)
           <div className={css.switch}>
             <input
               type="radio"
               name="selecType"
               value={"fellasOnly"}
               id="fellasOnly"
+              onChange={selectType}
+              // checked={true}
             />
             <span className={`${css.slider} ${css.round}`}></span>
           </div>
         </label>
         <label htmlFor="allUsers">
           All users(Display a list of random users which are not members of this
-          group) :
+          group)
           <div className={css.switch}>
             <input
               type="radio"
               name="selecType"
               value={"allUsers"}
               id="allUsers"
+              onChange={selectType}
             />
             <span className={`${css.slider} ${css.round}`}></span>
           </div>
         </label>
       </div>
-      Invite new members {items?.groupid}
+      <Form className={css.search}>
+        <FormGroup
+          placeholder="Search for people..."
+          icon="fas fa-magnifying-glass"
+          onChange={(e) => {
+            searchHandler(e?.target?.value);
+          }}
+        />
+      </Form>
+      <div className={css.users}>
+        <label className={css.head}>
+          <div className={css.switch}>
+            <input
+              type="checkbox"
+              name="sellectAll"
+              value={"all"}
+              id="sellectAll"
+              onChange={selectAll}
+            />
+            <span className={`${css.slider} ${css.round}`}></span>
+          </div>
+          Select all
+        </label>
+        <div className={css.items}>
+          {users?.length > 0 ? (
+            <>
+              {users.map((each) => (
+                <UserProfile
+                  items={each}
+                  onChange={onChangeHandler}
+                  removeItem={removeItemHandler}
+                />
+              ))}
+            </>
+          ) : (
+            <p align="center">No item found</p>
+          )}
+        </div>
+      </div>
+      <Button
+        className={css.send}
+        onClick={sendInvitations}
+        disabled={disabled}
+      >
+        <i className="fa-solid fa-paper-plane"></i>{" "}
+        {disabled ? "Sending invitations..." : "Send Invitations"}
+      </Button>
     </div>
   );
 };

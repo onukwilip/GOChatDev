@@ -676,6 +676,7 @@ const Settings = ({ chatroom, refreshState }) => {
       component: "invite",
       values: {
         groupid: chatroom?.ChatRoomID,
+        groupName: chatroom?.ChatRoomName,
       },
     };
 

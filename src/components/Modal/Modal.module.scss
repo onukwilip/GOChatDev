@@ -18,7 +18,7 @@
     max-width: 500px;
     word-wrap: break-word;
     min-height: 200px;
-    max-height: 80vh;
+    max-height: 90vh;
     overflow-y: auto;
     @include flex(center, center, 0);
   }
@@ -109,20 +109,85 @@
 .invite {
   @include flex(center, center, 1rem);
   flex-direction: column;
+  width: 500px;
+  .members-to-add {
+    padding: $padding;
+    background-color: rgba(lightgray, 0.2);
+    border-radius: $padding;
+    width: 100%;
+    @include flex(flex-start, flex-start, 1rem);
+    overflow-x: auto;
+
+    &::-webkit-scrollbar {
+      width: 80%;
+      height: 5px;
+      display: block;
+      background-color: rgba(lightgray, 0.5);
+      border-radius: 5px;
+    }
+    &::-webkit-scrollbar-thumb {
+      width: 10px;
+      height: 10px;
+      background-color: $button-default;
+      border-radius: 5px;
+    }
+    .each-member {
+      padding: $padding;
+      background-color: rgba(lightgray, 0.5);
+      border-radius: 5px;
+      @include flex(center, center, 00.5rem);
+      em {
+        font-style: normal;
+      }
+    }
+  }
   .options {
     @include flex(center, flex-start, 1rem);
-    flex-direction: column;
+    flex-direction: row;
+    width: 100%;
     label {
-      @include flex(flex-start, flex-start, 0);
+      @include flex(flex-start, flex-start, 00.5rem);
       flex-direction: column;
+      padding: $padding;
+      border-radius: $padding;
+      background-color: $button-hover-default;
+      color: white;
+    }
+  }
+
+  .search {
+    width: 100%;
+  }
+
+  .users {
+    width: 100%;
+    border-radius: 10px;
+    padding: $padding;
+    background-color: rgba(lightgray, 0.5);
+    label.head {
+      @include flex(flex-start, flex-start, 00.5rem);
+    }
+
+    .items {
+      max-height: 250px;
+      overflow-y: auto;
+    }
+  }
+
+  .send {
+    @include flex(center, center, 1rem);
+    i {
+      color: white;
     }
   }
 
   .switch {
     position: relative;
     display: inline-block;
-    width: 60px;
-    height: 34px;
+    // width: 60px;
+    // height: 34px;
+    width: 30px;
+    height: 17px;
   }
 
   /* Hide default HTML checkbox */
@@ -148,10 +213,14 @@
   .slider:before {
     position: absolute;
     content: "";
-    height: 26px;
-    width: 26px;
-    left: 4px;
-    bottom: 4px;
+    // height: 26px;
+    // width: 26px;
+    height: 13px;
+    width: 13px;
+    // left: 4px;
+    // bottom: 4px;
+    left: 2px;
+    bottom: 2px;
     background-color: white;
     -webkit-transition: 0.4s;
     transition: 0.4s;
@@ -166,9 +235,12 @@
   }
 
   input:checked + .slider:before {
-    -webkit-transform: translateX(26px);
-    -ms-transform: translateX(26px);
-    transform: translateX(26px);
+    // -webkit-transform: translateX(26px);
+    // -ms-transform: translateX(26px);
+    // transform: translateX(26px);
+    -webkit-transform: translateX(13px);
+    -ms-transform: translateX(13px);
+    transform: translateX(13px);
   }
 
   /* Rounded sliders */
@@ -178,5 +250,61 @@
 
   .slider.round:before {
     border-radius: 50%;
+  }
+}
+
+.sidebar-user-profile {
+  @include flex(center, flex-start, 1rem);
+  width: 100%;
+  cursor: pointer;
+  min-height: 80px;
+  &:hover {
+    animation: user-hover 0.2s forwards;
+  }
+  &:hover {
+    i {
+      color: $button-default;
+    }
+  }
+  .img-container {
+    position: relative;
+    img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .status {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: orange;
+      position: absolute;
+      bottom: 5px;
+      right: 0;
+      border: 2px solid beige;
+    }
+    .online {
+      background-color: $button-default;
+    }
+    .offline {
+      background-color: lightgray;
+    }
+  }
+  .details {
+    width: 100%;
+  }
+  .name {
+    font-weight: bold;
+  }
+  .about {
+    font-size: 15px;
+    color: rgba(0, 0, 0, 0.5);
+  }
+  .user-icon {
+    width: 12%;
+    i {
+      transform: scale(1.3);
+    }
   }
 }
