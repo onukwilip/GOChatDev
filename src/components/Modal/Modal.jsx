@@ -484,7 +484,7 @@ const InviteMembers = ({ items }) => {
         setMyFellas(data);
         setUsers(data);
         setBackupUsers(data);
-        console.log("My fellas", data);
+        // console.log("My fellas", data);
       }
     }
   };
@@ -497,7 +497,7 @@ const InviteMembers = ({ items }) => {
       const data = response?.data?.Data;
       if (data?.length > 0) {
         setAllUsers(data);
-        console.log("All users", data);
+        // console.log("All users", data);
       }
     }
   };
@@ -510,8 +510,8 @@ const InviteMembers = ({ items }) => {
       setBackupUsers(allUsers);
       setUsers(allUsers);
     }
-    console.log(e?.target?.id);
-    console.log(e?.target?.checked);
+    // console.log(e?.target?.id);
+    // console.log(e?.target?.checked);
   };
 
   const removeItemHandler = (newItem) => {
@@ -527,7 +527,7 @@ const InviteMembers = ({ items }) => {
     if (find?.length > 0) {
     } else {
       setItemsToSubmit((prev) => [...prev, { ...newItem }]);
-      console.log(newItem);
+      // console.log(newItem);
     }
   };
 
@@ -609,7 +609,7 @@ const InviteMembers = ({ items }) => {
         // console.log(e);
       });
 
-    if (response) {
+    if (response?.data?.ResponseCode === 200) {
       const body = [
         {
           ID: 0,
@@ -645,7 +645,7 @@ const InviteMembers = ({ items }) => {
       // setDisabled(false);
     }
 
-    console.log(response);
+    // console.log(response);
   };
 
   const sendInvitations = async () => {

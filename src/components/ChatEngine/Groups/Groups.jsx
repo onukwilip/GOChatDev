@@ -11,8 +11,10 @@ import ServerError from "../../ServerError/ServerError";
 import { PostNotification } from "../Notifications/Notifications";
 import {
   ChatRoomProfile,
+  Notification,
   RecievedRequest,
   SentRequest,
+  UserProfile,
 } from "../Sidebar/Sidebar";
 import NoItem from "../../NoItem/NoItem";
 
@@ -87,7 +89,7 @@ const Profile = ({ chatroom, refreshState }) => {
         console.log(e);
       });
 
-    if (response) {
+    if (response?.data?.ResponseCode === 200) {
       let senderName;
       const sender = await axios
         .get(`${general.domain}api/user/${senderId}`, { ...general.config })
@@ -135,7 +137,7 @@ const Profile = ({ chatroom, refreshState }) => {
       }));
     }
 
-    console.log(response);
+    // console.log(response);
     refreshState((prev) => !prev);
   };
 
@@ -268,10 +270,20 @@ const Profile = ({ chatroom, refreshState }) => {
                     </Button>
                   )}
                   {requestStatus === 2 && (
-                    <Button onClick={leaveGroup}>
-                      <i className="fa-solid fa-user-plus"></i>
-                      Exit group
-                    </Button>
+                    <>
+                      {chatroom?.ChatRoom_Owner !==
+                        localStorage.getItem("UserId") && (
+                        <div className={css.exit}>
+                          <Button
+                            className={css["btn-danger"]}
+                            onClick={leaveGroup}
+                          >
+                            <i className="fa-solid fa-person-walking-arrow-right"></i>
+                            Exit Group
+                          </Button>
+                        </div>
+                      )}
+                    </>
                   )}
                   {requestStatus === 1 && (
                     <Button
@@ -745,6 +757,129 @@ const Settings = ({ chatroom, refreshState }) => {
   );
 };
 
+const Notifications = ({ chatroom }) => {
+  const [notifications, setNotifications] = useState([]);
+  const general = useContext(General);
+  const url = `${general.domain}api/notification`;
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+
+  const getNotifications = async () => {
+    setLoading(true);
+    setError(false);
+    const response = await axios
+      .get(`${url}/${chatroom?.ChatRoomID}/group`, general.config)
+      .catch((e) => {
+        setLoading(false);
+        setError(true);
+      });
+    if (response) {
+      const data = response?.data?.Data;
+      if (data?.length > 0) {
+        setNotifications(data);
+      } else {
+        setNotifications([]);
+      }
+
+      setLoading(false);
+      setError(false);
+      // console.log(response);
+    }
+  };
+
+  useEffect(() => {
+    getNotifications();
+  }, []);
+  return (
+    <div className={css.notifications}>
+      <div className={css.header}>
+        <h1>Notifications</h1>
+      </div>
+      <>
+        {loading ? (
+          <div className={css["loading-container"]}>
+            <Loader />
+          </div>
+        ) : error ? (
+          <div className={css["loading-container"]}>
+            <ServerError />
+          </div>
+        ) : notifications.length < 1 ? (
+          <>
+            <p>No notifications</p>
+          </>
+        ) : (
+          <>
+            <div className={css.body}>
+              {notifications?.map((eachNotification, i) => (
+                <Notification items={eachNotification} key={i} />
+              ))}
+            </div>
+          </>
+        )}
+      </>
+    </div>
+  );
+};
+
+const Members = ({ chatroom }) => {
+  const members = [...chatroom?.Members];
+  const general = useContext(General);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+
+  const inviteMembers = () => {
+    const componentToRender = {
+      component: "invite",
+      values: {
+        groupid: chatroom?.ChatRoomID,
+        groupName: chatroom?.ChatRoomName,
+      },
+    };
+
+    sessionStorage.setItem(
+      "componentToRender",
+      JSON.stringify(componentToRender)
+    );
+    general.setModalState("true");
+    sessionStorage.setItem("modalState", "true");
+  };
+
+  return (
+    <div className={css.members}>
+      <div className={css.header}>
+        <h1>Members</h1>
+      </div>
+      <>
+        {loading ? (
+          <div className={css["loading-container"]}>
+            <Loader />
+          </div>
+        ) : error ? (
+          <div className={css["loading-container"]}>
+            <ServerError />
+          </div>
+        ) : members.length < 1 ? (
+          <>
+            <p>
+              No members in this group yet...You can invite some if you want
+            </p>
+          </>
+        ) : (
+          <>
+            <div className={css.body}>
+              {members?.map((eachMember, i) => (
+                <UserProfile items={eachMember} key={i} />
+              ))}
+              <Button onClick={inviteMembers}>+ Invite new member</Button>
+            </div>
+          </>
+        )}
+      </>
+    </div>
+  );
+};
+
 const Group = () => {
   const [chatroom, setChatroom] = useState({});
   const [refreshState, setRefreshState] = useState(false);
@@ -783,6 +918,8 @@ const Group = () => {
     }
   };
 
+  const deleteGroup = () => {};
+
   useEffect(() => {
     getChatroomProfile();
     return () => {};
@@ -809,6 +946,17 @@ const Group = () => {
           {chatroom?.ChatRoom_Owner === localStorage.getItem("UserId") && (
             <div className={css.setting}>
               <Settings chatroom={chatroom} refreshState={setRefreshState} />
+            </div>
+          )}
+          <Notifications chatroom={chatroom} />
+          <Members chatroom={chatroom} />
+          {chatroom?.ChatRoom_Owner === localStorage.getItem("UserId") && (
+            <div className={css["danger-zone"]}>
+              <h1>Danger Zone !</h1>
+              <Button className={css["btn-danger"]} onClick={deleteGroup}>
+                <i className="fa-solid fa-trash"></i>
+                Delete Group
+              </Button>
             </div>
           )}
         </section>

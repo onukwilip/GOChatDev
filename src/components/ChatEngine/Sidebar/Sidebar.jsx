@@ -172,6 +172,7 @@ export const NotificationMapComponents = (props) => {
                     css.notifications
                   }`}
                   setStates={props.setStates}
+                  addDeleteIcon={props.addDeleteIcon}
                 />
               </>
             );
@@ -396,7 +397,12 @@ export const Discussion = ({ items, className, addMessagesCount, onClick }) => {
   );
 };
 
-export const Notification = ({ items, className, onClick, setStates }) => {
+export const Notification = ({
+  items,
+  className,
+  addDeleteIcon,
+  setStates,
+}) => {
   const navigate = useNavigate();
   const general = useContext(General);
   const onClickHandler = async () => {
@@ -453,11 +459,13 @@ export const Notification = ({ items, className, onClick, setStates }) => {
             : items?.Message}
         </p>
       </div>
-      <div className={css["icon-container"]}>
-        <div className={css["delete-icon"]} onClick={onDeleteClickHandler}>
-          <i className="fa-solid fa-trash"></i>
+      {addDeleteIcon && (
+        <div className={css["icon-container"]}>
+          <div className={css["delete-icon"]} onClick={onDeleteClickHandler}>
+            <i className="fa-solid fa-trash"></i>
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 };

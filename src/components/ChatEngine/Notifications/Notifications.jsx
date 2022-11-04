@@ -182,6 +182,7 @@ const Notifications = () => {
             profiles={notifications}
             addMessagesCount={false}
             setStates={[setNotifications, setAllNotifications]}
+            addDeleteIcon={true}
           />
         )}
       </div>
